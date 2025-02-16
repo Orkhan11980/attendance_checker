@@ -1,4 +1,4 @@
-from api.config.database import get_db
+from config.database import get_db
 from api.model.attendance_model import Instructor, Student, User
 from api.schema.allschema import InstructorRegister, StudentRegister, Token, UserResponse
 from services.auth_service import ACCESS_TOKEN_EXPIRE_MINUTES, AuthService

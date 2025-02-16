@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from api.config.database import get_db
+from config.database import get_db
 from api.model.attendance_model import User
 from api.schema.allschema import TokenData
 from fastapi import Depends, HTTPException, status
