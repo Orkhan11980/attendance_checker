@@ -1,0 +1,5 @@
+.vercel
+flask-app-storage-405cf86f9a97.json
+.env
+__pycache__/
+*.pyc

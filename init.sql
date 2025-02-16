@@ -1,0 +1,3 @@
+CREATE USER IF NOT EXISTS 'checker'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON attendance.* TO 'checker'@'%';
+FLUSH PRIVILEGES;
