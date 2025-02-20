@@ -69,7 +69,7 @@ class RegisterService:
             db.refresh(user)
             db.refresh(student)
 
-            return user
+            return {"success": True, "user_id": user.id, "student_id": student.id}
 
         except SQLAlchemyError as e:
             # Rollback the transaction in case of any database error
@@ -131,7 +131,7 @@ class RegisterService:
             db.refresh(user)
             db.refresh(instructor)
 
-            return user
+            return {"success": True, "user_id": user.id, "instructor_id": instructor.id}
 
         except SQLAlchemyError as e:
             # Rollback the transaction in case of any database error
@@ -141,10 +141,10 @@ class RegisterService:
                 detail="An error occurred while registering the instructor"
             )
 
-        except Exception as e:
-            # Rollback the transaction in case of any other error
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=str(e)
-            )
+        # except Exception as e:
+        #     # Rollback the transaction in case of any other error
+        #     db.rollback()
+        #     raise HTTPException(
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         detail=str(e)
+        #     )
