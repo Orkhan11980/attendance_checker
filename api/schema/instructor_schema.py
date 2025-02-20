@@ -28,3 +28,12 @@ class Credentials:
 class AssignInstructorsSchema(BaseModel):
     course_id: int
     instructor_ids: List[int]
+
+
+
+class InstructorResponseSchema(BaseModel):
+    id: int
+    instructor_id: str
+    department: str
+    email: str
+

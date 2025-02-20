@@ -18,13 +18,13 @@ load_dotenv()
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 
-@router.post("/register/student", response_model=UserResponseSchema)
+@router.post("/register/student" )
 def register_student(data: StudentRegisterSchema, db: Session = Depends(get_db)):
     user = RegisterService.register_student(data, db)
     return user
 
 
-@router.post("/register/instructor", response_model=UserResponseSchema)
+@router.post("/register/instructor")
 def register_instructor(data: InstructorRegisterSchema, db: Session = Depends(get_db)):
     user = RegisterService.register_instructor(data, db)
     return user
@@ -32,7 +32,7 @@ def register_instructor(data: InstructorRegisterSchema, db: Session = Depends(ge
 
 @router.post("/token", response_model=TokenSchema)
 def login_user(
-    form_data: OAuth2PasswordRequestForm = Depends(),  # Accept form-data
+    form_data: OAuth2PasswordRequestForm = Depends(),  
     db: Session = Depends(get_db)
 ):
     user = AuthService.authenticate_user(form_data.username, form_data.password, db)

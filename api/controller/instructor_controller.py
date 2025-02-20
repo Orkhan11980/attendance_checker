@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from services.instructor_service import CourseService
-from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, InstructorAssignSchema, CourseResponseSchema
+from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, InstructorAssignSchema, CourseResponseSchema, InstructorResponseSchema
 from config.database import get_db
 from config.auth import get_current_instructor
-from api.model.attendance_model import Course
+from api.model.attendance_model import Course, Instructor, User
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
@@ -39,3 +40,22 @@ async def delete_course(
     course = CourseService.delete_course(current_user.role, course_id, db)
     return course
 
+
+
+@router.get("/instructors", response_model=list[InstructorResponseSchema])
+def get_instructors(
+    current_user=Depends(get_current_instructor),
+    db: Session = Depends(get_db)
+    ):
+    """Retrieve all instructors"""
+    instructors = (
+         db.query(Instructor.id, Instructor.instructor_id, Instructor.department, User.email)
+            .join(User, Instructor.user_id == User.id)
+            .all()
+    )
+    if not instructors:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No instructors found."
+        )
+    return instructors

@@ -18,6 +18,7 @@ from api.exceptions import (
 from api.controller import (
     auth_controller,
     instructor_controller,
+    qr_code_controller
 )
 
 app = FastAPI()
@@ -33,10 +34,12 @@ app = FastAPI()
 
 API_Route_auth = auth_controller.router
 API_Route_instructor = instructor_controller.router
+API_Route_qr = qr_code_controller.router
 
 routers = [
     API_Route_auth,
     API_Route_instructor,
+    API_Route_qr
 ]
 
 app.add_middleware(
