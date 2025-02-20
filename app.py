@@ -17,11 +17,7 @@ from api.exceptions import (
 
 from api.controller import (
     auth_controller,
-    # Uncomment other controllers if needed
-    # admin_controller,
-    # attendance_controller,
-    # instructor_controller,
-    # student_controller
+    instructor_controller,
 )
 
 app = FastAPI()
@@ -36,19 +32,11 @@ app = FastAPI()
 # app.add_exception_handler(Exception, global_exception_handler)
 
 API_Route_auth = auth_controller.router
-# Uncomment other routes if needed
-# API_Route_admin = admin_controller.router
-# API_Route_attendance = attendance_controller.router
-# API_Route_instructor = instructor_controller.router
-# API_Route_student = student_controller.router
+API_Route_instructor = instructor_controller.router
 
 routers = [
     API_Route_auth,
-    # Include other routes if needed
-    # API_Route_admin,
-    # API_Route_attendance,
-    # API_Route_instructor,
-    # API_Route_student,
+    API_Route_instructor,
 ]
 
 app.add_middleware(

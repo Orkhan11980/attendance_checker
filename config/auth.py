@@ -1,13 +1,21 @@
 # dependencies.py
+import os
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from .database import get_db
 from services.auth_service import AuthService
-from api.model import User
+from api.model.attendance_model import User
+from dotenv import load_dotenv
+load_dotenv()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# Get values from environment variables
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")  
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -18,25 +26,23 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
-        # Decode the JWT token
-        payload = AuthService.verify_token(token)
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
         
-        # Get user from database
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.email == email).first()
         if user is None:
             raise credentials_exception
-            
         return user
-        
+
+
     except JWTError:
         raise credentials_exception
 
-# Optional: Get specific user types
+
 async def get_current_instructor(current_user: User = Depends(get_current_user)):
     if current_user.role != "instructor":
         raise HTTPException(
