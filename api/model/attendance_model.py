@@ -50,6 +50,7 @@ class Course(Base):
     semester = Column(String(20), nullable=False)
     year = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String(50), nullable=False)
 
 class QRSession(Base):
     __tablename__ = 'qr_sessions'
