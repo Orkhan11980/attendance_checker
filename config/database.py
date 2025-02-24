@@ -1,32 +1,21 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 from api.model.base_model import Base
 from api.model.attendance_model import AttendanceRecord, Student, User, Instructor, QRSession, Course, instructor_course
 from tenacity import retry, wait_fixed, stop_after_attempt
 from urllib.parse import quote
+from sqlalchemy.orm import sessionmaker, Session
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Safely retrieve and validate environment variables
-def get_env_var(name: str, default: str = None) -> str:
-    value = os.getenv(name, default)
-    if value is None:
-        raise ValueError(f"Environment variable {name} is not set or is None")
-    return str(value)  # Ensure the value is a string
-
-try:
-    USER = get_env_var("MYSQL_USER")
-    PASSWORD = quote(get_env_var("MYSQL_PASSWORD"))  # Quote the password for URL safety
-    HOST = get_env_var("MYSQL_HOST")
-    PORT = get_env_var("MYSQL_PORT", "3306")  # Default to 3306 if not set
-    DATABASE_NAME = get_env_var("MYSQL_DATABASE")
-except ValueError as e:
-    print(f"Error loading environment variables: {e}")
-    raise
+USER = os.getenv("MYSQL_USER")
+PASSWORD = quote(os.getenv("MYSQL_PASSWORD"))
+HOST = os.getenv("MYSQL_HOST")
+PORT = os.getenv("MYSQL_PORT")
+DATABASE_NAME = os.getenv("MYSQL_DATABASE")
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(30))
 def connect_to_database():
@@ -44,6 +33,7 @@ def connect_to_database():
         return engine
     except Exception as e:
         print(f"Database connection error: {e}")
+        raise
         raise
 
 engine = connect_to_database()
