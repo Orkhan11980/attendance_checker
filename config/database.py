@@ -1,21 +1,21 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv
 from api.model.base_model import Base
 from api.model.attendance_model import AttendanceRecord, Student, User, Instructor, QRSession, Course, instructor_course
 from tenacity import retry, wait_fixed, stop_after_attempt
 from urllib.parse import quote
-from sqlalchemy.orm import sessionmaker, Session
 
 load_dotenv()
 
-USER = os.getenv("MYSQL_USER")
-PASSWORD = os.getenv("MYSQL_PASSWORD")
-HOST = os.getenv("MYSQL_HOST")
-PORT = os.getenv("MYSQL_PORT")
-DATABASE_NAME = os.getenv("MYSQL_DATABASE")
+# ✅ Use Railway's provided environment variables
+USER = os.getenv("MYSQLUSER")
+PASSWORD = quote(os.getenv("MYSQLPASSWORD", ""))  # Ensure password encoding
+HOST = os.getenv("MYSQLHOST")
+PORT = os.getenv("MYSQLPORT", "3306")  # Default to 3306 if not set
+DATABASE_NAME = os.getenv("MYSQLDATABASE")
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(30))
 def connect_to_database():
@@ -27,15 +27,15 @@ def connect_to_database():
             pool_size=10,
             max_overflow=20
         )
-        # Test the connection using text()
+        # ✅ Test connection
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return engine
     except Exception as e:
         print(f"Database connection error: {e}")
-        raise
-        raise
+        raise  # Keep only one raise statement
 
+# ✅ Establish DB connection
 engine = connect_to_database()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -58,5 +58,5 @@ def initialize_database():
         print(f"Error creating database tables: {e}")
         raise
 
-# Initialize the database tables
+# ✅ Initialize tables
 initialize_database()
