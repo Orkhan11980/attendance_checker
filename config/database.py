@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker, Session
 load_dotenv()
 
 USER = os.getenv("MYSQL_USER")
-PASSWORD = quote(os.getenv("MYSQL_PASSWORD"))
+PASSWORD = os.getenv("MYSQL_PASSWORD")
 HOST = os.getenv("MYSQL_HOST")
 PORT = os.getenv("MYSQL_PORT")
 DATABASE_NAME = os.getenv("MYSQL_DATABASE")
