@@ -7,19 +7,7 @@ class CourseCreateSchema(BaseModel):
     semester: str
     year: int
 
-class CourseResponseSchema(BaseModel):
-    id: int
-    crn: str
-    course_name: str
-    semester: str
-    year: int
-    instructors: List[int] 
 
-    class Config:
-        orm_mode = True
-
-class InstructorAssignSchema(BaseModel):
-    instructor_id: int
 
 class Credentials:
     email: str
@@ -37,3 +25,28 @@ class InstructorResponseSchema(BaseModel):
     department: str
     email: str
 
+
+#
+from datetime import datetime
+
+
+class UserResponse(BaseModel):
+    first_name: str
+    last_name: str
+
+    class Config:
+        from_attributes = True
+
+
+class CourseResponse(BaseModel):
+    id: int
+    crn: str
+    course_name: str
+    semester: str
+    year: int
+    created_at: datetime
+    created_by: str
+    instructors: List[UserResponse] = []
+
+    class Config:
+        from_attributes = True

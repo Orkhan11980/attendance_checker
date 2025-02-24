@@ -23,6 +23,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    instructor = relationship("Instructor", back_populates="user", uselist=False)
+
 class Student(Base):
     __tablename__ = 'students'
     
@@ -41,6 +43,9 @@ class Instructor(Base):
     instructor_id = Column(String(50), unique=True, nullable=False)
     department = Column(String(100), nullable=False)
 
+    user = relationship("User", back_populates="instructor")
+    courses = relationship("Course", secondary=instructor_course, back_populates="instructors")
+
 class Course(Base):
     __tablename__ = 'courses'
     
@@ -51,6 +56,8 @@ class Course(Base):
     year = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     created_by = Column(String(50), nullable=False)
+
+    instructors = relationship("Instructor", secondary=instructor_course, back_populates="courses")
 
 class QRSession(Base):
     __tablename__ = 'qr_sessions'

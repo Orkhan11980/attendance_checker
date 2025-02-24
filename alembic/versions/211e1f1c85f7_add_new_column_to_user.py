@@ -62,10 +62,10 @@ def upgrade():
     # ]:
     #     op.add_column("insolation", sa.Column("board_name", sa.String(255), nullable=True))  
      
-    if "created_by" not in [
-        column["name"] for column in inspector.get_columns("courses")
-    ]:
-        op.add_column("courses", sa.Column("created_by", sa.String(50), nullable=False))  
+    # if "created_by" not in [
+    #     column["name"] for column in inspector.get_columns("courses")
+    # ]:
+    #     op.add_column("courses", sa.Column("created_by", sa.String(50), nullable=False))  
     
     # op.drop_column('insolation', 'board_id')    
     
