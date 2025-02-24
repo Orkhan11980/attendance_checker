@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from services.instructor_service import CourseService
-from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, InstructorAssignSchema, CourseResponseSchema, InstructorResponseSchema
+from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, InstructorResponseSchema
 from config.database import get_db
 from config.auth import get_current_instructor
 from api.model.attendance_model import Course, Instructor, User
@@ -42,7 +42,7 @@ async def delete_course(
 
 
 
-@router.get("/instructors", response_model=list[InstructorResponseSchema])
+@router.get("/get_all_instructors", response_model=list[InstructorResponseSchema])
 def get_instructors(
     current_user=Depends(get_current_instructor),
     db: Session = Depends(get_db)
@@ -59,3 +59,19 @@ def get_instructors(
             detail="No instructors found."
         )
     return instructors
+
+@router.get("/get_included_instructors", response_model=List[CourseResponse])
+async def get_instructor_course(
+    current_user= Depends(get_current_instructor),
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+
+):
+    courses = CourseService.get_instructor_course(
+        current_user=current_user.id,
+        db=db,
+        skip=skip,
+        limit=limit
+    )
+    return courses

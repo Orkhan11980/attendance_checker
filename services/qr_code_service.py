@@ -2,13 +2,13 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 import uuid
-from api.model.attendance_model import Course, QRSession, AttendanceRecord, Student, User, instructor_course
+from api.model.attendance_model import Course, Instructor, QRSession, AttendanceRecord, Student, User, instructor_course
 from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema
 
 class QRService:
     
     @staticmethod
-    def generate_qr_session(data: QRSessionCreateSchema, instructor_id: int, db: Session):
+    def generate_qr_session(data: QRSessionCreateSchema, user_id: int, db: Session):
             # Check if the course exists
             course = db.query(Course).filter(Course.id == data.course_id).first()
             if not course:
@@ -17,15 +17,21 @@ class QRService:
                     detail=f"Course with ID {data.course_id} does not exist."
                 )
 
-            # Check if the instructor is enrolled in the course
-            instructor = db.query(instructor_course).filter(
-                instructor_course.c.instructor_id == instructor_id,
-                instructor_course.c.course_id == data.course_id
-            ).first()
+            instructor = db.query(Instructor).filter(Instructor.user_id == user_id).first()
             if not instructor:
                 raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Instructor with user ID {user_id} not found."
+                )
+            # Check if the instructor is enrolled in the course
+            enrollment = db.query(instructor_course).filter(
+                instructor_course.c.instructor_id == instructor.id,
+                instructor_course.c.course_id == data.course_id
+            ).first()
+            if not enrollment:
+                raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Instructor with ID {instructor_id} is not enrolled in course with ID {data.course_id}."
+                    detail=f"Instructor with ID {instructor.id} is not enrolled in course with ID {data.course_id}."
                 )
 
             # Generate QR session
@@ -34,7 +40,7 @@ class QRService:
 
             qr_session = QRSession(
                 course_id=data.course_id,
-                instructor_id=instructor_id,
+                instructor_id=instructor.id,
                 generated_at=datetime.utcnow(),
                 expires_at=expires_at,
                 is_active=True,

@@ -1,7 +1,7 @@
 from typing import List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from api.model.attendance_model import Course, Instructor, instructor_course
-from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema,CourseResponseSchema, Credentials,InstructorAssignSchema  
+from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, Credentials, UserResponse  
 from api.schema.instructor_schema import CourseCreateSchema
 from fastapi import HTTPException, status
 
@@ -92,3 +92,46 @@ class CourseService:
             db.commit()
 
             return {"success": True, "message": "Course and associated instructor assignments deleted successfully"}
+    
+
+    def get_instructor_course(current_user: int, db: Session, skip: int = 0, limit: int = 20,):
+        
+            instructor = db.query(Instructor).filter(Instructor.user_id == current_user).first()
+            if not instructor:
+                raise HTTPException(status_code=404, detail="Instructor not found")
+            
+            courses = (
+                    db.query(Course)
+                    .join(instructor_course)
+                    .filter(instructor_course.c.instructor_id == instructor.id)
+                    .options(
+                        joinedload(Course.instructors).joinedload(Instructor.user)
+                    )
+                    .order_by(Course.created_at.desc())
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                  )
+                
+            course_response = [
+                 CourseResponse(
+                    id = course.id,
+                    crn=course.crn,
+                    course_name=course.course_name,
+                    semester=course.semester,
+                    year=course.year,
+                    created_at=course.created_at,
+                    created_by=course.created_by,
+                    instructors=[
+                        UserResponse(
+                            first_name=instructor.user.first_name,
+                            last_name=instructor.user.last_name
+                        )
+                        for instructor in course.instructors
+                        if instructor.user 
+            ]
+
+                 )
+                 for course in courses
+            ]
+            return course_response
