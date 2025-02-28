@@ -16,7 +16,7 @@ async def create_course(
     db: Session = Depends(get_db)
 ):
     """Instructor creates a course."""
-    course = CourseService.create_course(current_user.email, course_data, db)
+    course = CourseService.create_course(current_user.email, current_user.id, course_data, db)
     return course
 
 

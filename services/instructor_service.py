@@ -8,8 +8,12 @@ from fastapi import HTTPException, status
 
 class CourseService:
     @staticmethod
-    def create_course(current_user: Credentials, course_data: CourseCreateSchema, db: Session):
+    def create_course(current_user: Credentials, current_user_id: int, course_data: CourseCreateSchema, db: Session):
 
+        instructor = db.query(Instructor).filter(Instructor.user_id == current_user_id).first()
+        if not instructor:
+            raise HTTPException(status_code=404, detail="Instructor not found")
+        
         existing_course = db.query(Course).filter(Course.crn == course_data.crn).first()
         if existing_course:
                 raise HTTPException(
@@ -23,6 +27,8 @@ class CourseService:
             year=course_data.year,
             created_by= current_user
         )
+        instructor.courses.append(new_course)
+
         db.add(new_course)
         db.commit()
         db.refresh(new_course)
