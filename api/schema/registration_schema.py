@@ -7,7 +7,6 @@ class UserRegisterSchema(BaseModel):
     password: str
     first_name: str
     last_name: str
-    role: str  
 
 class StudentRegisterSchema(UserRegisterSchema):
     student_id: str
