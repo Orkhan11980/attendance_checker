@@ -49,9 +49,16 @@ def get_instructors(
     ):
     """Retrieve all instructors"""
     instructors = (
-         db.query(Instructor.id, Instructor.instructor_id, Instructor.department, User.email)
-            .join(User, Instructor.user_id == User.id)
-            .all()
+        db.query(
+            Instructor.id,
+            Instructor.instructor_id,
+            Instructor.department,
+            User.email,
+            User.first_name,
+            User.last_name
+        )
+        .join(User, Instructor.user_id == User.id)
+        .all()
     )
     if not instructors:
         raise HTTPException(

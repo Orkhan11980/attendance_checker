@@ -35,7 +35,7 @@ class QRService:
                 )
 
             # Generate QR session
-            expires_at = datetime.utcnow() + timedelta(minutes=15)
+            expires_at = datetime.utcnow() + timedelta(minutes=data.expires_in)
             qr_code_data = str(uuid.uuid4())  # Unique QR code data
 
             qr_session = QRSession(
