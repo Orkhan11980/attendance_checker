@@ -24,6 +24,8 @@ class InstructorResponseSchema(BaseModel):
     instructor_id: str
     department: str
     email: str
+    first_name: str
+    last_name: str
 
 
 #

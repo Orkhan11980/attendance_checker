@@ -5,7 +5,7 @@ from typing import Optional
 
 class QRSessionCreateSchema(BaseModel):
     course_id: int
-    expires_in: Optional[int] = 15  # Default expiration time in minutes
+    expires_in: Optional[int] = 1  # Default expiration time in minutes
 
 class QRScanSchema(BaseModel):
     qr_code_data: str
