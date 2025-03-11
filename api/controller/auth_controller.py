@@ -1,11 +1,12 @@
 from datetime import timedelta
 import os
+from api.model.attendance_model import Student
 from config.database import get_db
 from services.auth_service import AuthService
 from services.registration_service import RegisterService
 from sqlalchemy.orm import Session
 from api.schema.registration_schema import LoginSchema, StudentRegisterSchema, InstructorRegisterSchema, TokenSchema, UserResponseSchema
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from dotenv import load_dotenv
 
@@ -36,6 +37,16 @@ def login_user(
     db: Session = Depends(get_db)
 ):
     user = AuthService.authenticate_user(form_data.username, form_data.password, db)
+
+    if user.role == "student":
+        phone_id = form_data.scopes[0] if form_data.scopes else None 
+        if not phone_id:
+            raise HTTPException(status_code=400, detail="Phone ID is required")
+
+        student = db.query(Student).filter(Student.user_id == user.id).first()
+        if not student or student.phone_id != phone_id:
+            raise HTTPException(status_code=400, detail="Invalid phone device")
+    
     access_token = AuthService.create_access_token({"sub": user.email}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token, "token_type": "bearer"}
 

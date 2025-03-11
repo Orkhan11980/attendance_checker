@@ -45,8 +45,8 @@ class AuthService:
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    @staticmethod
-    def login_user(data: LoginSchema, db: Session):
-        user = AuthService.authenticate_user(data, db)
-        access_token = AuthService.create_access_token({"sub": user.email}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-        return {"access_token": access_token, "token_type": "bearer"}
+    # @staticmethod
+    # def login_user(data: LoginSchema, db: Session):
+    #     user = AuthService.authenticate_user(data, db)
+    #     access_token = AuthService.create_access_token({"sub": user.email}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    #     return {"access_token": access_token, "token_type": "bearer"}

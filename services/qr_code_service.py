@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 import uuid
 from api.model.attendance_model import Course, Instructor, QRSession, AttendanceRecord, Student, User, instructor_course
-from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema
+from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema, StudentResponseSchema
+from typing import List
 
 class QRService:
     
@@ -88,3 +89,35 @@ class QRService:
         db.add(attendance)
         db.commit()
         return {"success": True, "message": "Attendance recorded"}
+
+
+
+
+    @staticmethod
+    def get_scanned_students(qr_session_id: int, db: Session) -> List[StudentResponseSchema]:
+            records = db.query(AttendanceRecord).filter(AttendanceRecord.qr_session_id == qr_session_id).all()
+
+            if not records:
+                raise HTTPException(status_code=404, detail="No attendance records found for this session")
+
+            student_ids = [rec.student_id for rec in records]
+
+            # Join with User to fetch name and surname
+            students = (
+                db.query(Student, User)
+                .join(User, Student.user_id == User.id)
+                .filter(Student.id.in_(student_ids))
+                .all()
+            )
+
+            return [
+                StudentResponseSchema(
+                    id=student.Student.id,
+                    student_id=student.Student.student_id,
+                    first_name=student.User.first_name,
+                    last_name=student.User.last_name,
+                    phone_id=student.Student.phone_id,
+                    registered_at=student.Student.registered_at,
+                )
+                for student in students
+            ]
