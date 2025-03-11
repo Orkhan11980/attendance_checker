@@ -1,8 +1,9 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from services.qr_code_service import QRService
-from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema, QRSessionResponseSchema, QRScanResponseSchema
+from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema, QRSessionResponseSchema, QRScanResponseSchema, StudentResponseSchema
 from config.database import get_db
 from config.auth import get_current_instructor, get_current_student
 
@@ -27,3 +28,12 @@ def scan_qr_code(
     """Student scans a QR code for attendance verification."""
     result = QRService.scan_qr(current_student.id, data, db)
     return result
+
+
+@router.get("/attendance/{qr_session_id}", response_model=List[StudentResponseSchema])
+def get_scanned_students(
+    qr_session_id: int,
+    db: Session = Depends(get_db),
+    current_instructor=Depends(get_current_instructor),
+    ):
+    return QRService.get_scanned_students(qr_session_id, db)

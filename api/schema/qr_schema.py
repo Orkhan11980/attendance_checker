@@ -24,3 +24,14 @@ class QRSessionResponseSchema(BaseModel):
 class QRScanResponseSchema(BaseModel):
     success: bool
     message: str
+
+class StudentResponseSchema(BaseModel):
+    id: int
+    student_id: str
+    first_name: str
+    last_name: str
+    phone_id: str
+    registered_at: datetime
+
+    class Config:
+        from_attributes = True
