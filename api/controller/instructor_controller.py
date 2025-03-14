@@ -2,10 +2,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from services.instructor_service import CourseService
-from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, InstructorResponseSchema
+from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, InstructorResponseSchema, StudentResponse
 from config.database import get_db
 from config.auth import get_current_instructor
-from api.model.attendance_model import Course, Instructor, User
+from api.model.attendance_model import Course, Instructor, Student, User
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
@@ -82,3 +82,20 @@ async def get_instructor_course(
         limit=limit
     )
     return courses
+
+
+@router.get("/students", response_model=List[StudentResponse])
+def get_all_students(db: Session = Depends(get_db)):
+    students = db.query(Student, User.first_name, User.last_name).join(User).all()
+    return [
+        StudentResponse(
+            id=student[0].id,
+            user_id=student[0].user_id,
+            student_id=student[0].student_id,
+            phone_id=student[0].phone_id,
+            phone_model=student[0].phone_model,
+            registered_at=student[0].registered_at,
+            first_name=student[1],
+            last_name=student[2]
+        ) for student in students
+    ]
