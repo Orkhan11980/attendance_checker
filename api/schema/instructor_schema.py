@@ -52,3 +52,17 @@ class CourseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class StudentResponse(BaseModel):
+    id: int
+    user_id: int
+    student_id: str
+    phone_id: str
+    phone_model: str
+    registered_at: datetime
+    first_name: str
+    last_name: str
+
+    class Config:
+        from_attributes = True
