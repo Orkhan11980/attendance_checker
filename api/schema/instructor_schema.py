@@ -63,6 +63,7 @@ class StudentResponse(BaseModel):
     registered_at: datetime
     first_name: str
     last_name: str
+    email: str
 
     class Config:
         from_attributes = True
