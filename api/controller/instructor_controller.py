@@ -86,12 +86,13 @@ async def get_instructor_course(
 
 @router.get("/students", response_model=List[StudentResponse])
 def get_all_students(db: Session = Depends(get_db)):
-    students = db.query(Student, User.first_name, User.last_name).join(User).all()
+    students = db.query(Student, User.first_name, User.last_name, User.email).join(User).all()
     return [
         StudentResponse(
             id=student[0].id,
             user_id=student[0].user_id,
             student_id=student[0].student_id,
+            email=student[3],
             phone_id=student[0].phone_id,
             phone_model=student[0].phone_model,
             registered_at=student[0].registered_at,
