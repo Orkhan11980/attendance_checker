@@ -2,6 +2,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, T
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.model.base_model import Base
+import pytz
+
+baku_tz = pytz.timezone("Asia/Baku")
 
 # Association table for instructor-course many-to-many relationship
 instructor_course = Table(
@@ -20,8 +23,8 @@ class User(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     role = Column(String(20), nullable=False)  # 'student' or 'instructor'
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(baku_tz))
+    updated_at = Column(DateTime, default=lambda: datetime.now(baku_tz), onupdate=lambda: datetime.now(baku_tz))
 
     instructor = relationship("Instructor", back_populates="user", uselist=False)
 
@@ -33,7 +36,7 @@ class Student(Base):
     student_id = Column(String(50), unique=True, nullable=False)
     phone_id = Column(String(100), unique=True, nullable=False)
     phone_model = Column(String(100), nullable=False)
-    registered_at = Column(DateTime, default=datetime.utcnow)
+    registered_at = Column(DateTime, default=lambda: datetime.now(baku_tz))
 
 class Instructor(Base):
     __tablename__ = 'instructors'
@@ -54,7 +57,7 @@ class Course(Base):
     course_name = Column(String(200), nullable=False)
     semester = Column(String(20), nullable=False)
     year = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(baku_tz))
     created_by = Column(String(50), nullable=False)
 
     instructors = relationship("Instructor", secondary=instructor_course, back_populates="courses")
@@ -65,7 +68,7 @@ class QRSession(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
     instructor_id = Column(Integer, ForeignKey('instructors.id'), nullable=False)
-    generated_at = Column(DateTime, default=datetime.utcnow)
+    generated_at = Column(DateTime, default=lambda: datetime.now(baku_tz))
     expires_at = Column(DateTime, nullable=False)
     is_active = Column(Boolean, default=True)
     qr_code_data = Column(String(500), nullable=False)
@@ -77,6 +80,6 @@ class AttendanceRecord(Base):
     qr_session_id = Column(Integer, ForeignKey('qr_sessions.id'), nullable=False)
     student_id = Column(Integer, ForeignKey('students.id'), nullable=False)
     course_id = Column(Integer, ForeignKey('courses.id'), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(baku_tz))
     phone_id = Column(String(100), nullable=False)  # For verification
     phone_model = Column(String(100), nullable=False)

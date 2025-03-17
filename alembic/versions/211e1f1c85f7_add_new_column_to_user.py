@@ -69,8 +69,8 @@ def upgrade():
     
     # op.drop_column('insolation', 'board_id')    
     
-    # op.drop_table('attendance_records')
-    # op.drop_table('qr_sessions')
+    op.drop_table('attendance_records')
+    op.drop_table('qr_sessions')
     # op.drop_table('instructor_course')
     # op.drop_table('students')
     # op.drop_table('instructors')
