@@ -5,7 +5,7 @@ import uuid
 from api.model.attendance_model import Course, Instructor, QRSession, AttendanceRecord, Student, User, instructor_course
 from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema, StudentResponseSchema
 from typing import List
-
+from api.model.attendance_model import baku_tz
 class QRService:
     
     @staticmethod
@@ -36,13 +36,13 @@ class QRService:
                 )
 
             # Generate QR session
-            expires_at = datetime.utcnow() + timedelta(seconds=data.expires_in)
+            expires_at = datetime.now(baku_tz) + timedelta(seconds=data.expires_in)
             qr_code_data = str(uuid.uuid4())  # Unique QR code data
 
             qr_session = QRSession(
                 course_id=data.course_id,
                 instructor_id=instructor.id,
-                generated_at=datetime.utcnow(),
+                generated_at=datetime.now(baku_tz),
                 expires_at=expires_at,
                 is_active=True,
                 qr_code_data=qr_code_data
@@ -60,7 +60,7 @@ class QRService:
         if not qr_session:
             raise HTTPException(status_code=400, detail="Invalid QR code")
         
-        if qr_session.expires_at < datetime.utcnow() or not qr_session.is_active:
+        if qr_session.expires_at < datetime.now(baku_tz) or not qr_session.is_active:
             raise HTTPException(status_code=400, detail="QR code expired")
         
         student = db.query(Student).filter(Student.user_id == current_user).first()        
@@ -82,7 +82,7 @@ class QRService:
             qr_session_id=qr_session.id,
             student_id=student.id,
             course_id=qr_session.course_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(baku_tz),
             phone_id=qr_data.phone_id,
             phone_model=qr_data.phone_model
         )

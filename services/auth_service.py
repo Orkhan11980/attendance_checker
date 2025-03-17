@@ -10,7 +10,7 @@ from fastapi import HTTPException, status
 from jose import jwt
 from api.model.attendance_model import User
 from api.schema.registration_schema import LoginSchema
-
+from api.model.attendance_model import baku_tz
 load_dotenv()
 
 # Get values from environment variables
@@ -41,7 +41,7 @@ class AuthService:
     @staticmethod
     def create_access_token(data: dict, expires_delta: timedelta = None):
         to_encode = data.copy()
-        expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
+        expire = datetime.now(baku_tz) + (expires_delta if expires_delta else timedelta(minutes=15))
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
