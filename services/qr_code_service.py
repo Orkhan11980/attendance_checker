@@ -36,7 +36,7 @@ class QRService:
                 )
 
             # Generate QR session
-            expires_at = datetime.utcnow() + timedelta(minutes=data.expires_in)
+            expires_at = datetime.utcnow() + timedelta(seconds=data.expires_in)
             qr_code_data = str(uuid.uuid4())  # Unique QR code data
 
             qr_session = QRSession(
@@ -94,8 +94,8 @@ class QRService:
 
 
     @staticmethod
-    def get_scanned_students(qr_session_id: int, db: Session) -> List[StudentResponseSchema]:
-            records = db.query(AttendanceRecord).filter(AttendanceRecord.qr_session_id == qr_session_id).all()
+    def get_scanned_students(course_id: int, db: Session) -> List[StudentResponseSchema]:
+            records = db.query(AttendanceRecord).filter(AttendanceRecord.course_id == course_id).all()
 
             if not records:
                 raise HTTPException(status_code=404, detail="No attendance records found for this session")

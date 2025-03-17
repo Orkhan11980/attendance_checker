@@ -30,10 +30,10 @@ def scan_qr_code(
     return result
 
 
-@router.get("/attendance/{qr_session_id}", response_model=List[StudentResponseSchema])
+@router.get("/attendance/{course_id}", response_model=List[StudentResponseSchema])
 def get_scanned_students(
-    qr_session_id: int,
+    course_id: int,
     db: Session = Depends(get_db),
     current_instructor=Depends(get_current_instructor),
     ):
-    return QRService.get_scanned_students(qr_session_id, db)
+    return QRService.get_scanned_students(course_id, db)
