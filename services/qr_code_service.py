@@ -117,7 +117,7 @@ class QRService:
                     first_name=student.User.first_name,
                     last_name=student.User.last_name,
                     phone_id=student.Student.phone_id,
-                    scanned_at=records.timestamp,
+                    scanned_at=next((rec.timestamp for rec in records if rec.student_id == student.Student.id), None),
                 )
                 for student in students
             ]
