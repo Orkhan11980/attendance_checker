@@ -117,7 +117,7 @@ class QRService:
                     first_name=student.User.first_name,
                     last_name=student.User.last_name,
                     phone_id=student.Student.phone_id,
-                    registered_at=student.Student.registered_at,
+                    scanned_at=records.timestamp,
                 )
                 for student in students
             ]
