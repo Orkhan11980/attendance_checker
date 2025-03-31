@@ -1,9 +1,10 @@
 from typing import List
 from sqlalchemy.orm import Session, joinedload
-from api.model.attendance_model import Course, Instructor, instructor_course
+from api.model.attendance_model import AttendanceRecord, Course, Instructor, QRSession, instructor_course
 from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, Credentials, UserResponse  
 from api.schema.instructor_schema import CourseCreateSchema
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 
 
 class CourseService:
@@ -76,28 +77,39 @@ class CourseService:
         db.commit()
         return {"success": True, "course_id": data.course_id}
 
-
+    @staticmethod
     def delete_course(current_user: Credentials, course_id: int, db: Session):
-            # Check if the current user is authorized (e.g., an instructor or admin)
-            if current_user not in ["instructor", "admin"]:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only authorized instructors or admins can perform this action."
-                )
+        if current_user not in ["instructor", "admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only authorized instructors or admins can perform this action."
+            )
 
-            # Check if the course exists
-            course = db.query(Course).filter(Course.id == course_id).first()
-            if not course:
-                raise HTTPException(status_code=404, detail="Course not found")
+        # Check if the course exists
+        course = db.query(Course).filter(Course.id == course_id).first()
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
 
-            # Delete all associated rows in the instructor_course table
+        try:
+            # Delete attendance records related to this course
+            db.query(AttendanceRecord).filter(AttendanceRecord.course_id == course_id).delete()
+
+            # Delete QR sessions related to this course
+            db.query(QRSession).filter(QRSession.course_id == course_id).delete()
+
+            # Delete instructor-course assignments
             db.query(instructor_course).filter(instructor_course.c.course_id == course_id).delete()
 
-            # Delete the course
+            # Finally, delete the course
             db.delete(course)
             db.commit()
 
-            return {"success": True, "message": "Course and associated instructor assignments deleted successfully"}
+            return {"success": True, "message": "Course and all associated records deleted successfully"}
+        
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=500, detail="Failed to delete course due to database constraints.")
+
     
 
     def get_instructor_course(current_user: int, db: Session, skip: int = 0, limit: int = 20,):
