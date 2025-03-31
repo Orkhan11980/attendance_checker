@@ -60,6 +60,9 @@ class QRService:
         if not qr_session:
             raise HTTPException(status_code=400, detail="Invalid QR code")
         
+        if qr_session.expires_at.tzinfo is None:
+            qr_session.expires_at = qr_session.expires_at.replace(tzinfo=baku_tz)
+
         if qr_session.expires_at < datetime.now(baku_tz) or not qr_session.is_active:
             raise HTTPException(status_code=400, detail="QR code expired")
         
