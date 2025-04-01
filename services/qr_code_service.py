@@ -62,13 +62,17 @@ class QRService:
         if not qr_session:
             raise HTTPException(status_code=400, detail="Invalid QR code")
         
-        # Ensure both are timezone-aware
         current_time = get_baku_time()
-        qr_session.expires_at = qr_session.expires_at.astimezone(baku_tz)  # Convert to Asia/Baku timezone if not already aware
-        if qr_session.expires_at < current_time or not qr_session.is_active:
-             raise HTTPException(status_code=400, detail="QR code expired")
-        # current_time = get_baku_time()
-
+        
+        # Make sure both datetimes are timezone-aware before comparison
+        if qr_session.expires_at.tzinfo is None:
+            # If expires_at is naive, make it timezone-aware
+            expires_at_aware = baku_tz.localize(qr_session.expires_at)
+        else:
+            expires_at_aware = qr_session.expires_at
+        
+        if expires_at_aware < current_time or not qr_session.is_active:
+            raise HTTPException(status_code=400, detail="QR code expired")
         
         student = db.query(Student).filter(Student.user_id == current_user).first()        
         if not student:
@@ -96,8 +100,6 @@ class QRService:
         db.add(attendance)
         db.commit()
         return {"success": True, "message": "Attendance recorded"}
-    
-    
 
     @staticmethod
     def get_scanned_students(course_id: int, db: Session) -> List[StudentResponseSchema]:
