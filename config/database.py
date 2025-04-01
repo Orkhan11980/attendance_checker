@@ -15,7 +15,7 @@ USER = os.getenv("MYSQLUSER")
 PASSWORD = quote(os.getenv("MYSQLPASSWORD", ""))  # Ensure password encoding
 HOST = os.getenv("MYSQLHOST")
 PORT = os.getenv("MYSQLPORT", "3306")  # Default to 3306 if not set
-DATABASE_NAME = os.getenv("MYSQLDATABASE")
+DATABASE_NAME = os.getenv("MYSQL_DATABASE")
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(30))
 def connect_to_database():
