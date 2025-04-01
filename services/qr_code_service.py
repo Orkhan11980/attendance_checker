@@ -68,8 +68,7 @@ class QRService:
         if qr_session.expires_at < current_time or not qr_session.is_active:
              raise HTTPException(status_code=400, detail="QR code expired")
         # current_time = get_baku_time()
-        # if qr_session.expires_at < current_time or not qr_session.is_active:
-        #     raise HTTPException(status_code=400, detail="QR code expired")
+
         
         student = db.query(Student).filter(Student.user_id == current_user).first()        
         if not student:
