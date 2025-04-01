@@ -84,12 +84,16 @@ class CourseService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only authorized instructors or admins can perform this action."
             )
+        
 
         # Check if the course exists
         course = db.query(Course).filter(Course.id == course_id).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
+        if current_user.email != course.created_by:
+            raise HTTPException(status_code=403, detail="You are not authorized to delete this course")
+        
         try:
             # Delete attendance records related to this course
             db.query(AttendanceRecord).filter(AttendanceRecord.course_id == course_id).delete()
