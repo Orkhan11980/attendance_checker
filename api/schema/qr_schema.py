@@ -1,7 +1,7 @@
 
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 class QRSessionCreateSchema(BaseModel):
     course_id: int
@@ -31,7 +31,7 @@ class StudentResponseSchema(BaseModel):
     first_name: str
     last_name: str
     phone_id: str
-    scanned_at: datetime
+    scanned_at: List[datetime]  
 
     class Config:
         from_attributes = True
