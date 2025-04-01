@@ -78,20 +78,21 @@ class CourseService:
         return {"success": True, "course_id": data.course_id}
 
     @staticmethod
-    def delete_course(current_user: Credentials, course_id: int, db: Session):
-        if current_user not in ["instructor", "admin"]:
+    def delete_course(role: str, email: str, course_id: int, db: Session) -> dict:
+        # Only authorized instructors or admins can delete courses
+        if role not in ["instructor", "admin"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only authorized instructors or admins can perform this action."
             )
-        
 
         # Check if the course exists
         course = db.query(Course).filter(Course.id == course_id).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
-        if current_user.email != course.created_by:
+        # Ensure the current user is the one who created the course
+        if email != course.created_by:
             raise HTTPException(status_code=403, detail="You are not authorized to delete this course")
         
         try:
@@ -113,6 +114,7 @@ class CourseService:
         except IntegrityError:
             db.rollback()
             raise HTTPException(status_code=500, detail="Failed to delete course due to database constraints.")
+
 
     
     @staticmethod
