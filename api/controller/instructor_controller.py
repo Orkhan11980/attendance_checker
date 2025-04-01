@@ -37,7 +37,7 @@ async def delete_course(
     db: Session = Depends(get_db)
 ):
     """Instructor creates a course."""
-    course = CourseService.delete_course(current_user.role, course_id, db)
+    course = CourseService.delete_course(current_user.role, current_user.email, course_id, db)
     return course
 
 
