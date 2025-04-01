@@ -103,29 +103,38 @@ class QRService:
 
     @staticmethod
     def get_scanned_students(course_id: int, db: Session) -> List[StudentResponseSchema]:
-            records = db.query(AttendanceRecord).filter(AttendanceRecord.course_id == course_id).all()
+        # Fetch all attendance records for the course
+        records = db.query(AttendanceRecord).filter(AttendanceRecord.course_id == course_id).all()
 
-            if not records:
-                raise HTTPException(status_code=404, detail="No attendance records found for this session")
+        if not records:
+            raise HTTPException(status_code=404, detail="No attendance records found for this session")
 
-            student_ids = [rec.student_id for rec in records]
+        # Extract the student IDs from the attendance records
+        student_ids = list(set(rec.student_id for rec in records))  # Using set to remove duplicates
 
-            # Join with User to fetch name and surname
-            students = (
-                db.query(Student, User)
-                .join(User, Student.user_id == User.id)
-                .filter(Student.id.in_(student_ids))
-                .all()
-            )
+        # Join with Student and User to fetch details about the students
+        students = (
+            db.query(Student, User)
+            .join(User, Student.user_id == User.id)
+            .filter(Student.id.in_(student_ids))
+            .all()
+        )
 
-            return [
+        # Prepare the response, including all scanned times for each student
+        student_responses = []
+        for student in students:
+            student_scans = [
+                rec.timestamp for rec in records if rec.student_id == student.Student.id
+            ]
+            student_responses.append(
                 StudentResponseSchema(
                     id=student.Student.id,
                     student_id=student.Student.student_id,
                     first_name=student.User.first_name,
                     last_name=student.User.last_name,
                     phone_id=student.Student.phone_id,
-                    scanned_at=next((rec.timestamp for rec in records if rec.student_id == student.Student.id), None),
+                    scanned_at=student_scans,  # List of all scan times
                 )
-                for student in students
-            ]
+            )
+
+        return student_responses
