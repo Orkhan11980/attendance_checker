@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from api.model.attendance_model import User, Student, Instructor
+from api.model.attendance_model import User, Student, Instructor, get_baku_time
 from api.schema.registration_schema import StudentRegisterSchema, InstructorRegisterSchema
 from passlib.context import CryptContext
 from sqlalchemy.exc import SQLAlchemyError
@@ -42,12 +42,15 @@ class RegisterService:
             hashed_password = RegisterService.hash_password(data.password)
 
             # Create the user (but don't commit yet)
+            current_time = get_baku_time()
             user = User(
                 email=data.email,
                 password=hashed_password,
                 first_name=data.first_name,
                 last_name=data.last_name,
-                role="student"
+                role="student",
+                created_at=current_time,
+                updated_at=current_time
             )
             db.add(user)
             db.flush()  # Assigns an ID to the user without committing
@@ -57,7 +60,8 @@ class RegisterService:
                 user_id=user.id,
                 student_id=data.student_id,
                 phone_id=data.phone_id,
-                phone_model=data.phone_model
+                phone_model=data.phone_model,
+                registered_at=current_time
             )
             db.add(student)
             db.flush()  # Assigns an ID to the student without committing
@@ -78,14 +82,6 @@ class RegisterService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="An error occurred while registering the student"
             )
-
-        # except Exception as e:
-        #     # Rollback the transaction in case of any other error
-        #     db.rollback()
-        #     raise HTTPException(
-        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #         detail=str(e)
-        #     )
 
 
     @staticmethod
@@ -108,12 +104,16 @@ class RegisterService:
             # Hash the password
             hashed_password = RegisterService.hash_password(data.password)
 
+            # Create the user with explicit time
+            current_time = get_baku_time()
             user = User(
                 email=data.email,
                 password=hashed_password,
                 first_name=data.first_name,
                 last_name=data.last_name,
-                role="instructor"
+                role="instructor",
+                created_at=current_time,
+                updated_at=current_time
             )
             db.add(user)
             db.flush()  
@@ -140,7 +140,7 @@ class RegisterService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="An error occurred while registering the instructor"
             )
-
+    
         # except Exception as e:
         #     # Rollback the transaction in case of any other error
         #     db.rollback()

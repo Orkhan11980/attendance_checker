@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 from fastapi import HTTPException, status
 from jose import jwt
-from api.model.attendance_model import User
+from api.model.attendance_model import User, get_baku_time
 from api.schema.registration_schema import LoginSchema
 from api.model.attendance_model import baku_tz
 load_dotenv()
@@ -41,7 +41,7 @@ class AuthService:
     @staticmethod
     def create_access_token(data: dict, expires_delta: timedelta = None):
         to_encode = data.copy()
-        expire = datetime.now(baku_tz) + (expires_delta if expires_delta else timedelta(minutes=15))
+        expire = get_baku_time() + (expires_delta if expires_delta else timedelta(minutes=15))
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 

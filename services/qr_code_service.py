@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 import uuid
-from api.model.attendance_model import Course, Instructor, QRSession, AttendanceRecord, Student, User, instructor_course
+from api.model.attendance_model import Course, Instructor, QRSession, AttendanceRecord, Student, User, get_baku_time, instructor_course
 from api.schema.qr_schema import QRSessionCreateSchema, QRScanSchema, StudentResponseSchema
 from typing import List
 from api.model.attendance_model import baku_tz
 class QRService:
+    
+  class QRService:
     
     @staticmethod
     def generate_qr_session(data: QRSessionCreateSchema, user_id: int, db: Session):
@@ -36,13 +38,14 @@ class QRService:
                 )
 
             # Generate QR session
-            expires_at = datetime.now(baku_tz) + timedelta(seconds=data.expires_in)
+            current_time = get_baku_time()
+            expires_at = current_time + timedelta(seconds=data.expires_in)
             qr_code_data = str(uuid.uuid4())  # Unique QR code data
 
             qr_session = QRSession(
                 course_id=data.course_id,
                 instructor_id=instructor.id,
-                generated_at=datetime.now(baku_tz),
+                generated_at=current_time,
                 expires_at=expires_at,
                 is_active=True,
                 qr_code_data=qr_code_data
@@ -55,15 +58,13 @@ class QRService:
 
 
     @staticmethod
-    def scan_qr(current_user: int , qr_data: QRScanSchema, db: Session):
+    def scan_qr(current_user: int, qr_data: QRScanSchema, db: Session):
         qr_session = db.query(QRSession).filter(QRSession.qr_code_data == qr_data.qr_code_data).first()
         if not qr_session:
             raise HTTPException(status_code=400, detail="Invalid QR code")
         
-        if qr_session.expires_at.tzinfo is None:
-            qr_session.expires_at = qr_session.expires_at.replace(tzinfo=baku_tz)
-
-        if qr_session.expires_at < datetime.now(baku_tz) or not qr_session.is_active:
+        current_time = get_baku_time()
+        if qr_session.expires_at < current_time or not qr_session.is_active:
             raise HTTPException(status_code=400, detail="QR code expired")
         
         student = db.query(Student).filter(Student.user_id == current_user).first()        
@@ -85,16 +86,15 @@ class QRService:
             qr_session_id=qr_session.id,
             student_id=student.id,
             course_id=qr_session.course_id,
-            timestamp=datetime.now(baku_tz),
+            timestamp=current_time,
             phone_id=qr_data.phone_id,
             phone_model=qr_data.phone_model
         )
         db.add(attendance)
         db.commit()
         return {"success": True, "message": "Attendance recorded"}
-
-
-
+    
+    
 
     @staticmethod
     def get_scanned_students(course_id: int, db: Session) -> List[StudentResponseSchema]:
