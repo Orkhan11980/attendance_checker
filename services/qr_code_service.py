@@ -8,7 +8,6 @@ from typing import List
 from api.model.attendance_model import baku_tz
 class QRService:
     
-  class QRService:
     
     @staticmethod
     def generate_qr_session(data: QRSessionCreateSchema, user_id: int, db: Session):
