@@ -111,7 +111,7 @@ class CourseService:
             raise HTTPException(status_code=500, detail="Failed to delete course due to database constraints.")
 
     
-
+    @staticmethod
     def get_instructor_course(current_user: int, db: Session, skip: int = 0, limit: int = 20,):
         
             instructor = db.query(Instructor).filter(Instructor.user_id == current_user).first()
