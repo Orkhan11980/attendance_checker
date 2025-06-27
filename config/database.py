@@ -15,7 +15,7 @@ USER = os.getenv("MYSQLUSER")
 PASSWORD = quote(os.getenv("MYSQLPASSWORD", ""))  # Ensure password encoding
 HOST = os.getenv("MYSQLHOST")
 PORT = os.getenv("MYSQLPORT", "3306")  # Default to 3306 if not set
-DATABASE_NAME = os.getenv("MYSQL_DATABASE")
+DATABASE_NAME = os.getenv("MYSQLDATABASE")
 
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(30))
 def connect_to_database():
@@ -52,11 +52,12 @@ def get_db() -> Session:
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(10))
 def initialize_database():
     try:
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=engine, checkfirst=True)
         print("Database tables created successfully.")
     except Exception as e:
         print(f"Error creating database tables: {e}")
         raise
+
 
 # ✅ Initialize tables
 initialize_database()

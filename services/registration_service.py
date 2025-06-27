@@ -20,7 +20,7 @@ class RegisterService:
             if existing_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already registered"
+                    detail="Email already registered.."
                 )
             # Check if student_id already exists
             existing_student_id = db.query(Student).filter(Student.student_id == data.student_id).first()

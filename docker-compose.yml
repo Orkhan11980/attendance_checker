@@ -5,15 +5,12 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       - MYSQLUSER=${MYSQLUSER}
       - MYSQLPASSWORD=${MYSQLPASSWORD}
       - MYSQLHOST=${MYSQLHOST}
       - MYSQLPORT=${MYSQLPORT}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}  # ✅ Fixed
+      - MYSQLDATABASE=${MYSQLDATABASE}
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
@@ -21,25 +18,26 @@ services:
       timeout: 10s
       retries: 3
 
-  db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=caching_sha2_password
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # ✅ Fixed
-      MYSQL_DATABASE: ${MYSQL_DATABASE}  # ✅ Fixed
-      MYSQLUSER: ${MYSQLUSER}
-      MYSQLPASSWORD: ${MYSQLPASSWORD}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$MYSQLUSER", "-p$MYSQLPASSWORD"]  # ✅ Fixed
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
-volumes:
-  mysql_data:
+  # db:
+  #   image: mysql:8.0
+  #   command: --default-authentication-plugin=caching_sha2_password
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # ✅ Fixed
+  #     MYSQL_DATABASE: ${MYSQL_DATABASE}  # ✅ Fixed
+  #     MYSQLUSER: ${MYSQLUSER}
+  #     MYSQLPASSWORD: ${MYSQLPASSWORD}
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$MYSQLUSER", "-p$MYSQLPASSWORD"]  # ✅ Fixed
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   mysql_data:
