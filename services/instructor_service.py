@@ -13,7 +13,7 @@ class CourseService:
 
         instructor = db.query(Instructor).filter(Instructor.user_id == current_user_id).first()
         if not instructor:
-            raise HTTPException(status_code=404, detail="Instructor not found")
+            raise HTTPException(status_code=404, detail="Instructor not found...")
         
         existing_course = db.query(Course).filter(Course.crn == course_data.crn).first()
         if existing_course:
@@ -43,7 +43,7 @@ class CourseService:
         if current_user != "instructor":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only authorized instructors can perform this action."
+                detail="Only authorized instructors can perform this action..."
             )
         # Check if the course exists
         course = db.query(Course).filter(Course.id == data.course_id).first()
