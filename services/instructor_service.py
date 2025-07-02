@@ -1,6 +1,6 @@
 from typing import List
 from sqlalchemy.orm import Session, joinedload
-from api.model.attendance_model import AttendanceRecord, Course, Instructor, QRSession, instructor_course
+from api.model.attendance_model import AttendanceRecord, Course, Instructor, QRSession, User, instructor_course
 from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, Credentials, UserResponse  
 from api.schema.instructor_schema import CourseCreateSchema
 from fastapi import HTTPException, status
@@ -159,3 +159,29 @@ class CourseService:
                  for course in courses
             ]
             return course_response
+    
+
+
+    @staticmethod
+    def get_personal_data(current_user, db: Session):
+        instructor = (
+            db.query(Instructor)
+            .join(User, Instructor.user_id == User.id)
+            .filter(Instructor.user_id == current_user.id)
+            .first()
+        )
+
+        if not instructor:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Instructor not found."
+            )
+
+        return {
+            "id": instructor.id,
+            "instructor_id": instructor.instructor_id,
+            "department": instructor.department,
+            "email": instructor.user.email,
+            "first_name": instructor.user.first_name,
+            "last_name": instructor.user.last_name
+        }

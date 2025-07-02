@@ -67,3 +67,16 @@ class StudentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+class InstructorPersonalDataSchema(BaseModel):
+    id: int
+    instructor_id: str
+    department: str
+    email: str
+    first_name: str
+    last_name: str
+
+    class Config:
+        orm_mode = True
