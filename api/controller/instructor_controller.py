@@ -2,12 +2,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from services.instructor_service import CourseService
-from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, InstructorResponseSchema, StudentResponse
+from api.schema.instructor_schema import AssignInstructorsSchema, CourseCreateSchema, CourseResponse, InstructorPersonalDataSchema, InstructorResponseSchema, StudentResponse
 from config.database import get_db
 from config.auth import get_current_instructor
 from api.model.attendance_model import Course, Instructor, Student, User
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
+
 
 @router.post("/")
 async def create_course(
@@ -48,6 +49,7 @@ def get_instructors(
     db: Session = Depends(get_db)
     ):
     """Retrieve all instructors"""
+    print(current_user)
     instructors = (
         db.query(
             Instructor.id,
@@ -58,6 +60,7 @@ def get_instructors(
             User.last_name
         )
         .join(User, Instructor.user_id == User.id)
+        .filter(Instructor.user_id != current_user.id)
         .all()
     )
     if not instructors:
@@ -100,3 +103,6 @@ def get_all_students(db: Session = Depends(get_db)):
             last_name=student[2]
         ) for student in students
     ]
+
+
+
