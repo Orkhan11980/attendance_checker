@@ -59,7 +59,7 @@ for route in routers:
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "message": "Service is up and running"}
+    return {"status": "ok", "message": "Service is running"}
 
 if __name__ == '__main__':
     import uvicorn
